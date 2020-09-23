@@ -108,7 +108,7 @@ void PropheseeWrapperViewer::create_window(const std::string &window_name, const
     cv::moveWindow(window_name, shift_x, shift_y);
 }
 
-void PropheseeWrapperViewer::showData(const ros::TimerEvent& event) {
+void PropheseeWrapperViewer::showData() {
     if (!show_cd_)
         return;
 
@@ -143,9 +143,24 @@ int main(int argc, char **argv) {
     while (ros::ok() && !wv.isInitialized()) {
         ros::spinOnce();
     }
+
+    // period in seconds
     double period = wv.display_acc_time_/1000000.0;
     ROS_INFO("period is %f",period);
-    ros::Timer timer = n.createTimer(ros::Duration(wv.display_acc_time_/1000000.0), &PropheseeWrapperViewer::showData, &wv); 
+    double start_time = ros::Time::now().toSec();
+    ROS_INFO("%f", start_time);
+    double steps = 0.0;
+    double time_left = 0.0;
+    while (ros::ok()){
+        steps += 1.0;
+        ros::spinOnce();
+        wv.showData();
+        time_left = start_time + steps*period - ros::Time::now().toSec();
+        //ROS_INFO("time left %f", time_left);
+        if (time_left > 0){
+            ros::Duration(time_left).sleep();
+        }
+    }
     ros::spin();
     return 0;
 }

@@ -16,7 +16,7 @@
     <param name="raw_file_to_read" value="" />
 
     <!-- Streaming rate in Hz for the events array. By default is 64 microseconds or max 100 events in array -->
-    <param name="event_streaming_rate" value="0" />
+    <param name="event_streaming_rate" value="1000" />
 
     <!-- Graylevel frame rate in fps -->
     <param name="graylevel_frame_rate" value="30" />

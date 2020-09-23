@@ -32,7 +32,7 @@ public:
     ~PropheseeWrapperViewer();
 
     /// \brief Shows currently available CD data
-    void showData(const ros::TimerEvent& event);
+    void showData();
 
     /// \brief Checks if the frame generator class is initialized or not
     ///
