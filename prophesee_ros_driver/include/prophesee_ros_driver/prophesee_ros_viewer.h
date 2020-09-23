@@ -32,12 +32,16 @@ public:
     ~PropheseeWrapperViewer();
 
     /// \brief Shows currently available CD data
-    void showData();
+    void showData(const ros::TimerEvent& event);
 
     /// \brief Checks if the frame generator class is initialized or not
     ///
     /// @return true if initialized and false otherwise
     bool isInitialized();
+
+    /// \brief Display accumulation time
+    /// The time interval to display events up to the current time, in us
+    int display_acc_time_;
 
 private:
     /// \brief Callback triggered when data are recieved from the camera info topic
@@ -83,6 +87,9 @@ private:
     /// \brief Image Transport subscriber for gray-level frames
     image_transport::Subscriber sub_gl_frame_;
 
+    /// \brief Image Transport Publisher for CD frames
+    image_transport::Publisher pub_cd_frame_;
+
     /// \brief Used to subscribe to the gray-level frame topic
     image_transport::ImageTransport it_;
 
@@ -94,11 +101,6 @@ private:
 
     /// \brief Window name for visualizing gray-level frames
     std::string gl_window_name_;
-
-    /// \brief Display accumulation time
-
-    /// The time interval to display events up to the current time, in us
-    int display_acc_time_;
 
     /// \brief If the frame generators are initialized with teh sensor width and height
     bool initialized_;

@@ -39,6 +39,9 @@ PropheseeWrapperViewer::PropheseeWrapperViewer() :
     // Subscribe to gray-level event buffer topic
     if (show_graylevels_)
         sub_gl_frame_ = it_.subscribe(topic_graylevel_buffer, 1, &PropheseeWrapperViewer::glFrameCallback, this);
+    
+    // publish to CD frame image topit
+    pub_cd_frame_ = it_.advertise("/CD_frame", 1);
 }
 
 PropheseeWrapperViewer::~PropheseeWrapperViewer() {
@@ -105,7 +108,7 @@ void PropheseeWrapperViewer::create_window(const std::string &window_name, const
     cv::moveWindow(window_name, shift_x, shift_y);
 }
 
-void PropheseeWrapperViewer::showData() {
+void PropheseeWrapperViewer::showData(const ros::TimerEvent& event) {
     if (!show_cd_)
         return;
 
@@ -116,7 +119,8 @@ void PropheseeWrapperViewer::showData() {
 
     const auto &cd_frame = cd_frame_generator_.get_current_frame();
     if (!cd_frame.empty()) {
-        cv::imshow(cd_window_name_, cd_frame);
+        sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", cd_frame).toImageMsg();
+        pub_cd_frame_.publish(img_msg);
     }
 }
 
@@ -133,22 +137,15 @@ int process_ui_for(const int &delay_ms) {
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "prophesee_ros_viewer");
-
+    ros::NodeHandle n;
     PropheseeWrapperViewer wv;
 
     while (ros::ok() && !wv.isInitialized()) {
         ros::spinOnce();
     }
-
-    while (ros::ok()) {
-        ros::spinOnce();
-
-        wv.showData();
-
-        process_ui_for(33);
-    }
-
-    ros::shutdown();
-
+    double period = wv.display_acc_time_/1000000.0;
+    ROS_INFO("period is %f",period);
+    ros::Timer timer = n.createTimer(ros::Duration(wv.display_acc_time_/1000000.0), &PropheseeWrapperViewer::showData, &wv); 
+    ros::spin();
     return 0;
 }

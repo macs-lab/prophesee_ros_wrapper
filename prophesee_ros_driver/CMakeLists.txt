@@ -84,3 +84,18 @@ add_dependencies(
     prophesee_event_msgs_generate_messages_cpp
     ${catkin_EXPORTED_TARGETS}
 )
+
+# ros image viewer
+add_executable(image_viewer
+    src/img_viewer.cpp
+)
+
+target_link_libraries(
+    image_viewer 
+    ${catkin_LIBRARIES}
+)
+
+add_dependencies(
+    image_viewer 
+    ${catkin_EXPORTED_TARGETS}
+)
