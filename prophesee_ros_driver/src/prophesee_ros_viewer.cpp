@@ -6,6 +6,8 @@
 
 #include "prophesee_ros_viewer.h"
 
+using namespace cv;
+
 typedef const boost::function<void(const prophesee_event_msgs::EventArray::ConstPtr &msgs)> callback;
 
 PropheseeWrapperViewer::PropheseeWrapperViewer() :
@@ -41,7 +43,7 @@ PropheseeWrapperViewer::PropheseeWrapperViewer() :
         sub_gl_frame_ = it_.subscribe(topic_graylevel_buffer, 1, &PropheseeWrapperViewer::glFrameCallback, this);
     
     // publish to CD frame image topit
-    pub_cd_frame_ = it_.advertise("/CD_frame", 1);
+    pub_cd_frame_ = it_.advertise("/CD_frame", 100);
 }
 
 PropheseeWrapperViewer::~PropheseeWrapperViewer() {
@@ -112,14 +114,24 @@ void PropheseeWrapperViewer::showData() {
     if (!show_cd_)
         return;
 
-    if (cd_frame_generator_.get_last_ros_timestamp() < ros::Time::now() - ros::Duration(0.5)) {
-        cd_frame_generator_.reset();
-        initialized_ = false;
-    }
-
+    //if (cd_frame_generator_.get_last_ros_timestamp() < ros::Time::now() - ros::Duration(0.5)) {
+    //    cd_frame_generator_.reset();
+    //    initialized_ = false;
+    //}
     const auto &cd_frame = cd_frame_generator_.get_current_frame();
     if (!cd_frame.empty()) {
-        sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", cd_frame).toImageMsg();
+        Mat frame_cp;
+        cd_frame.copyTo(frame_cp);
+        frame_id ++;
+        auto time_now = ros::Time::now();
+        if (print_timestamp){
+            std::ostringstream text;
+            text << "seq:" << frame_id << " time_stamp:" << time_now;
+            putText(frame_cp, text.str(), Point(20,20), FONT_HERSHEY_DUPLEX, 0.7, Scalar(0,0,255), 1);
+        }
+        sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", frame_cp).toImageMsg();
+        img_msg->header.seq = frame_id;
+        img_msg->header.stamp = time_now;
         pub_cd_frame_.publish(img_msg);
     }
 }

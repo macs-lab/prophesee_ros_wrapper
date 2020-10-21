@@ -20,6 +20,8 @@
 
 #include "cd_frame_generator.h"
 
+#include <sstream>
+
 /// \brief Main class ROS listener and viewer
 ///
 /// Listens ROS topics publishing data from Prophesee cameras and visualizes them on a screen
@@ -110,6 +112,11 @@ private:
 
     /// \brief If visualizing gray-level frames
     bool show_graylevels_ = false;
+
+    /// \brief frame id
+    long frame_id = 0;
+
+    bool print_timestamp = true;
 };
 
 #endif /* PROPHESEE_ROS_VIEWER_H_ */
